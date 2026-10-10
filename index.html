@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARSKEY TRANSFORMASI AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            background-image: 
+                linear-gradient(rgba(3, 7, 18, 0.85), rgba(3, 7, 18, 0.92)),
+                url('https://i.imgur.com/JrqnEU9.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e5e7eb;
+        }
+
+        .font-display { font-family: 'Orbitron', sans-serif; }
+        
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(56, 189, 248, 0.12);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            border-color: rgba(56, 189, 248, 0.9);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            outline: none;
+        }
+
+        .btn-glow {
+            background: linear-gradient(90deg, #0284c7, #0ea5e9);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 60%);
+            transform: scale(0);
+            transition: transform 0.5s ease-out;
+            z-index: -1;
+        }
+
+        .btn-glow:hover::before {
+            transform: scale(1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #38bdf8, #818cf8, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        option {
+            background-color: #0f172a;
+            color: #e5e7eb;
+            font-weight: 600;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+        
+        #errorToast {
+            transform: translateY(-200%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #errorToast.show {
+            transform: translateY(0);
+        }
+
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 18, 0.96);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            padding: 20px;
+        }
+        .auth-card {
+            background: rgba(10, 15, 30, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.2), inset 0 0 25px rgba(56, 189, 248, 0.08);
+        }
+        .auth-card h2 {
+            color: #38bdf8;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+        .auth-card p {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .auth-card input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            border-radius: 12px;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .auth-card input::placeholder {
+            color: #475569;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+        .auth-card input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+            background: rgba(15, 23, 42, 1);
+        }
+        
+        .auth-card .btn-verify {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #0284c7, #0ea5e9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+        .auth-card .btn-verify:hover {
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
+            transform: translateY(-2px);
+        }
+        #authErrorToast {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-6 lg:p-8">
+
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <img src="https://i.imgur.com/ZmCmrVm.png" alt="Marskey Logo" class="h-20 mx-auto mb-6 drop-shadow-[0_0_20px_rgba(56,189,248,0.7)]" onerror="this.src='https://placehold.co/80x80/0f172a/38bdf8?text=M'">
+            <h2>MARSKEY GATE</h2>
+            <p>Masukkan Token Sistem Anda.</p>
+            
+            <div class="input-group">
+                <input type="password" id="tokenInput" placeholder="Token Marskey (MK-XXXXXX)" autocomplete="off" />
+            </div>
+
+            <button class="btn-verify" onclick="checkAccess()">VERIFIKASI & MASUK</button>
+            <div id="authErrorToast">Token Marskey tidak valid!</div>
+        </div>
+    </div>
+
+    <div id="errorToast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-red-600/90 text-white px-6 py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.5)] font-bold flex items-center gap-3 backdrop-blur-md z-[100]">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span id="errorMsg">Harap pilih Preset Konsep & Gaya terlebih dahulu!</span>
+    </div>
+
+    <header class="flex justify-between items-center mb-8 glass-panel rounded-2xl p-4">
+        <div class="flex items-center gap-4">
+            <img src="https://i.imgur.com/ZmCmrVm.png" alt="Marskey Logo" class="h-14 drop-shadow-[0_0_15px_rgba(56,189,248,0.5)]" onerror="this.src='https://placehold.co/60x60/0f172a/38bdf8?text=M'">
+            <div>
+                <h1 class="text-3xl font-display font-bold text-gradient tracking-wider">MARSKEY</h1>
+                <p class="text-sm font-semibold text-cyan-500 uppercase tracking-[0.2em] drop-shadow-md">Transformasi AI</p>
+            </div>
+        </div>
+        <button onclick="repairUI()" title="Reset / Repair UI" class="flex items-center justify-center p-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500 transition-all shadow-lg hover:shadow-red-500/25">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        </button>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        <div class="md:col-span-5 glass-panel rounded-2xl p-6 h-fit">
+            
+            <div class="flex flex-col sm:flex-row gap-2 mb-6 bg-black/40 p-1.5 rounded-xl border border-cyan-500/30">
+                <button id="btnTab1" onclick="switchTab('karakter')" class="flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-white bg-gradient-to-r from-cyan-600 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.4)]">
+                    CUSTOM CHARACTER
+                </button>
+                <button id="btnTab2" onclick="switchTab('kendaraan')" class="flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-gray-400 hover:text-cyan-300 bg-black/40">
+                    TRANSFORM UNIT
+                </button>
+            </div>
+
+            <div id="tab1Content" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-cyan-400 mb-2">Mode Skenario</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="modeSkenario" value="standar" class="peer sr-only" checked onchange="toggleMode()">
+                            <div class="p-3 text-center rounded-xl glass-input text-gray-400 peer-checked:text-cyan-300 peer-checked:border-cyan-400 peer-checked:bg-cyan-900/35 transition-all font-semibold text-xs">Standar Multi-Scene</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="modeSkenario" value="guardian" class="peer sr-only" onchange="toggleMode()">
+                            <div class="p-3 text-center rounded-xl glass-input text-gray-400 peer-checked:text-purple-300 peer-checked:border-purple-400 peer-checked:bg-purple-900/35 transition-all font-semibold text-xs">Guardian Particle-Fusion</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="uploadGridContainer" class="grid grid-cols-2 gap-4 transition-all duration-300">
+                    <div class="relative aspect-square rounded-xl glass-input overflow-hidden group cursor-pointer flex flex-col items-center justify-center text-center p-2 border-dashed border-2 hover:border-cyan-400 transition-colors">
+                        <input type="file" id="uploadKarakter" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="previewImage(this, 'previewKarakter', 'textKarakter')">
+                        <img id="previewKarakter" class="absolute inset-0 w-full h-full object-cover opacity-0 z-10 transition-opacity duration-300">
+                        <div id="textKarakter" class="relative z-0 text-cyan-500/70 group-hover:text-cyan-400 flex flex-col items-center group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            <span class="text-[10px] font-semibold">Subjek Utama</span>
+                        </div>
+                    </div>
+
+                    <div id="boxPendamping" style="display: none;" class="relative aspect-square rounded-xl glass-input overflow-hidden group cursor-pointer flex flex-col items-center justify-center text-center p-2 border-dashed border-2 hover:border-purple-400 transition-colors">
+                        <input type="file" id="uploadTambahan" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="previewImage(this, 'previewTambahan', 'textTambahanBox')">
+                        <img id="previewTambahan" class="absolute inset-0 w-full h-full object-cover opacity-0 z-10 transition-opacity duration-300">
+                        <div id="textTambahanBox" class="relative z-0 text-purple-400/70 group-hover:text-purple-300 flex flex-col items-center group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <span class="text-[10px] font-semibold">Subjek Pendamping</span>
+                        </div>
+                    </div>
+
+                    <div class="relative aspect-square rounded-xl glass-input overflow-hidden group cursor-pointer flex flex-col items-center justify-center text-center p-2 border-dashed border-2 hover:border-cyan-400 transition-colors">
+                        <input type="file" id="uploadBackground" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="previewImage(this, 'previewBackground', 'textBackground')">
+                        <img id="previewBackground" class="absolute inset-0 w-full h-full object-cover opacity-0 z-10 transition-opacity duration-300">
+                        <div id="textBackground" class="relative z-0 text-cyan-500/70 group-hover:text-cyan-400 flex flex-col items-center group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span class="text-[10px] font-semibold">Latar Belakang (Opsional)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl glass-input border border-amber-500/30">
+                    <label class="block text-sm font-semibold text-amber-400 mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Item Pemicu Transformasi (Relik / Aksesoris)
+                    </label>
+                    <select id="relicTrigger" class="w-full p-3 rounded-xl glass-input text-amber-200 cursor-pointer font-semibold text-xs" onchange="updateDynamicPrompt()">
+                        <option value="" selected>-- TANPA RELIK (Gunakan Pijakan Lantai) --</option>
+                        <option value="watch">⌚ Jam Tangan Futuristik (Smart Watch - Merayap di Lengan)</option>
+                        <option value="belt">🎽 Sabuk Gesper Energi (Henshin Belt Flow)</option>
+                        <option value="ring">💍 Cincin Energi Kuarsa (Ring Trigger Flow)</option>
+                        <option value="pendant">📿 Liontin Kalung Energi (Power Pendant Flow)</option>
+                    </select>
+                </div>
+
+                <div class="p-4 rounded-xl glass-input border border-cyan-500/30">
+                    <label class="block text-sm font-semibold text-yellow-400 mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        Panel Integrasi Senjata / Gear Tambahan
+                    </label>
+                    <div class="space-y-3">
+                        <select id="presetSenjata" class="w-full p-3 rounded-xl glass-input text-yellow-300 cursor-pointer font-semibold text-xs" onchange="selectWeaponPreset()">
+                            <option value="" disabled selected>-- PILIH ATAU KETIK SENJATA --</option>
+                            <option value="Dual plasma energy pistols mounted on hands">Dual Plasma Energy Pistols</option>
+                            <option value="Glowing futuristic energy katana blade">Glowing Futuristic Energy Katana</option>
+                            <option value="Heavy shoulder-mounted rocket launcher pods">Heavy Shoulder Rocket Launchers</option>
+                            <option value="Tactical assault rifle AK-47 sci-fi custom edition">Sci-Fi Tactical Assault Rifle</option>
+                            <option value="Massive energy plasma minigun on right arm">Plasma Minigun Arm Cannon</option>
+                            <option value="Vibranium dual energy shields on forearms">Vibranium Forearm Energy Shields</option>
+                            <option value="custom">-- Ketik Senjata Kustom Sendiri --</option>
+                        </select>
+                        <input type="text" id="customWeaponInput" placeholder="Atau ketik senjata kustom (misal: dual laser swords)..." class="w-full p-3 rounded-xl glass-input text-yellow-200 placeholder-yellow-600 text-xs font-semibold" oninput="updateDynamicPrompt()">
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-cyan-400 mb-2">Pilih Preset Konsep & Gaya</label>
+                        <select id="presetKombinasi" class="w-full p-3 rounded-xl glass-input text-gray-200 cursor-pointer appearance-none font-semibold mb-2" onchange="updatePresetData()">
+                            <option value="" disabled selected>-- PILIH PRESET TRANSFORMASI --</option>
+                            <option value="chronos_watch">⏱️ Chronos Watch-Mech (Silver & Black Heavy Armor + Referensi Video)</option>
+                            <option value="exosuit">Exosuit Tactical Mech (Military Plating)</option>
+                            <option value="mecha">Mecha Gundam / Heavy Assault Mech</option>
+                            <option value="nanotech">Nano-Tech Merambat Cepat (Advanced Power Armor)</option>
+                            <option value="national">National Pride Armor (Zirah Identitas Negara)</option>
+                            <option value="symbiote">Bio-Organic / Alien Symbiote (Gaya Venom)</option>
+                            <option value="celestial">Divine Celestial / Angelic Paladin</option>
+                            <option value="ninja">Cyber Ninja / Shadow Assassin</option>
+                            <option value="elemental">Elemental Titan (Magma/Es/Petir)</option>
+                            <option value="samurai">Cybernetic Ronin / Samurai Futuristik</option>
+                            <option value="madmax">Apocalyptic Scavenger / Mad Max</option>
+                            <option value="steampunk">Steampunk Clockwork / Victorian Gear</option>
+                            <option value="marine">Galactic Space Marine / Star Commando</option>
+                            <option value="crystal">Crystal Quartz / Prism Shard Armor</option>
+                        </select>
+                        
+                        <p id="deskripsiSingkat" class="text-[11px] text-cyan-200/70 italic leading-relaxed mb-3 hidden"></p>
+
+                        <div id="countryInputBox" class="hidden mb-3 relative z-40">
+                            <label class="block text-xs font-bold text-yellow-400 mb-1">Nama Negara & Ornamen (Contoh: Indonesia, Garuda, Batik)</label>
+                            <input type="text" id="countryName" placeholder="Ketik negara / budaya..." class="w-full p-3 rounded-xl glass-input text-yellow-300 border-yellow-500/50 focus:border-yellow-400 font-semibold" oninput="updateDynamicPrompt()">
+                        </div>
+
+                        <div id="nanotechOptionsBox" class="hidden mb-3 relative z-[60]">
+                            <label class="block text-xs font-bold text-red-400 mb-1">Varian Zirah (Khusus Nano-Tech)</label>
+                            <select id="nanotechSuit" class="w-full p-3 rounded-xl glass-input text-red-300 border-red-500/50 focus:border-red-400 focus:ring-1 focus:ring-red-400 font-semibold text-sm cursor-pointer" onchange="updateDynamicPrompt()">
+                                <option value="Sleek vibrant red and silver metallic nano-tech armor with segmented locking">Custom Video (Perak Merah Sleek & Platform)</option>
+                                <option value="Sleek vibrant blue and cobalt metallic nano-tech armor with segmented locking" class="text-blue-400">Blue Cobalt (Perak Biru Sleek & Platform)</option>
+                                <option value="Classic Red and Gold advanced high-tech nano-armor">Alpha-Suit (Klasik Merah Emas)</option>
+                                <option value="Sleek Silver and Red mechanical heavy armor">Silver Vanguard (Perak Merah Klasik)</option>
+                                <option value="Heavy militaristic Gunmetal Grey and Black artillery armor with shoulder cannons">Heavy Artillery (Gunmetal & Hitam)</option>
+                                <option value="Colossal, hyper-massive, heavily plated oversized robotic juggernaut mech suit with extreme thickness, pneumatic industrial pistons, and heavy mechanical exoskeleton">Goliath Titan (Super Masif Bulky / Anti-Banned)</option>
+                                <option value="Matte Black stealth armor with glowing blue neon accents">Stealth Suit (Hitam Matte Cahaya Biru)</option>
+                                <option value="Dark Emerald and Gold metallic nano-tech armor with intricate dragon scale textures" class="text-green-400">Dragon Buster (Hijau Zamrud & Emas Bersisik)</option>
+                                <option value="Toxic Matte Black stealth armor with glowing neon green accents and bio-luminescent lines" class="text-green-400">Toxic Stealth (Hitam Matte & Neon Hijau)</option>
+                            </select>
+                        </div>
+
+                        <textarea id="textArahan" rows="5" placeholder="Skrip otomatis akan muncul di sini setelah Anda memilih preset..." class="w-full p-3 rounded-xl glass-input text-gray-200 placeholder-gray-600 resize-none text-sm transition-all duration-300"></textarea>
+                    </div>
+                </div>
+
+                <div id="guardianOptions" class="hidden mb-6 bg-purple-900/20 border border-purple-500/30 p-4 rounded-xl transition-all duration-300 relative z-30 mt-4">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" id="addonWings" class="peer sr-only">
+                            <div class="w-10 h-6 bg-gray-700/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500 peer-checked:after:bg-white"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-purple-300 group-hover:text-purple-200 transition-colors font-display tracking-wide">Epic Fusion: Corak Hewan & Sayap Baja</span>
+                            <span class="text-[10px] text-purple-400/70 mt-0.5">Zirah otomatis diukir corak sisik pendamping dan sayap mekanik terbuka di detik akhir.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div id="tab2Content" class="hidden space-y-6">
+                <div class="p-4 bg-blue-900/20 border border-blue-500/40 rounded-xl shadow-inner">
+                    <p class="text-xs text-blue-200 leading-relaxed font-medium">
+                        <span class="font-bold text-blue-400 tracking-wider">MODUL KENDARAAN:</span> Upload kendaraan (motor, mobil, jet, sepeda) untuk di-transformasi menjadi <span class="text-cyan-300">Cyber-Titan Mecha Orisinal</span>. Aman dari pelanggaran Hak Cipta & bebas klaim merek dagang.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative aspect-square rounded-xl glass-input bg-blue-900/10 border-blue-500/30 overflow-hidden group cursor-pointer flex flex-col items-center justify-center text-center p-2 border-dashed border-2 hover:border-blue-400 transition-colors">
+                        <input type="file" id="uploadKendaraan" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="previewImage(this, 'previewKendaraan', 'textKendaraan')">
+                        <img id="previewKendaraan" class="absolute inset-0 w-full h-full object-cover opacity-0 z-10 transition-opacity duration-300">
+                        <div id="textKendaraan" class="relative z-0 text-blue-500/70 group-hover:text-blue-400 flex flex-col items-center group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            <span class="text-[10px] font-semibold">Upload Kendaraan</span>
+                        </div>
+                    </div>
+
+                    <div class="relative aspect-square rounded-xl glass-input overflow-hidden group cursor-pointer flex flex-col items-center justify-center text-center p-2 border-dashed border-2 hover:border-blue-400 transition-colors">
+                        <input type="file" id="uploadBgKendaraan" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="previewImage(this, 'previewBgKendaraan', 'textBgKendaraan')">
+                        <img id="previewBgKendaraan" class="absolute inset-0 w-full h-full object-cover opacity-0 z-10 transition-opacity duration-300">
+                        <div id="textBgKendaraan" class="relative z-0 text-blue-500/70 group-hover:text-blue-400 flex flex-col items-center group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span class="text-[10px] font-semibold">Latar Belakang (Opsional)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl glass-input border border-blue-500/30">
+                    <label class="block text-sm font-semibold text-cyan-300 mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        Integrasi Persenjataan Robot Kendaraan
+                    </label>
+                    <div class="space-y-3">
+                        <select id="presetSenjataKendaraan" class="w-full p-3 rounded-xl glass-input text-cyan-200 cursor-pointer font-semibold text-xs" onchange="selectVehicleWeaponPreset()">
+                            <option value="" selected>-- TANPA SENJATA EKSTRA (Zirah Murni) --</option>
+                            <option value="Dual heavy forearm plasma cannons unfolding from wheel hubs">Dual Forearm Plasma Cannons (Dari Poros Roda)</option>
+                            <option value="Twin shoulder-mounted micro missile barrage pods">Twin Shoulder Missile Pods (Peluncur Rudal Bahu)</option>
+                            <option value="High-frequency energon katana sword forged from vehicle chassis frame">Energon Blade Katana (Bilah Sasis Kendaraan)</option>
+                            <option value="Heavy rotary Gatling gun converted from exhaust system">Heavy Rotary Gatling Cannon (Dari Knalpot)</option>
+                            <option value="Reinforced riot shield forming from car doors/hood">Heavy Blast Shield (Dari Pintu/Kap Kendaraan)</option>
+                            <option value="custom">-- Ketik Senjata Robot Kustom --</option>
+                        </select>
+                        <input type="text" id="customWeaponKendaraanInput" placeholder="Atau ketik senjata robot sendiri (misal: dual laser blasters)..." class="w-full p-3 rounded-xl glass-input text-cyan-200 placeholder-blue-600 text-xs font-semibold" oninput="updateVehicleDynamicPrompt()">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-blue-400 mb-2">Preset Cyber-Titan (Tipe Robot)</label>
+                    <select id="presetKendaraan" class="w-full p-3 rounded-xl glass-input border-blue-500/30 text-gray-200 cursor-pointer font-semibold mb-3" onchange="updateVehiclePresetData()">
+                        <option value="" disabled selected>-- PILIH TIPE TRANSFORMASI ROBOT --</option>
+                        <option value="brawler">Heavy Brawler Mech (Truk, Bus, Tank, Alat Berat)</option>
+                        <option value="recon">Agile Recon Titan (Motor Sport, Mobil Sedan, Sepeda)</option>
+                        <option value="cruiser">Urban Dual-Form Mecha (Motor Matic / Skuter Vario/NMax / Chopper)</option>
+                        <option value="aerial">Aerial Strike Drone (Heli, Pesawat, Jet Tempur)</option>
+                        <option value="beast">Mech-Beast Zoid (Predator Hewan Robotik / Naga / Serigala Baja)</option>
+                    </select>
+                    <p id="descKendaraan" class="text-[11px] text-blue-200/70 italic leading-relaxed mb-3 hidden"></p>
+                    <textarea id="textArahanKendaraan" rows="5" placeholder="Skrip otomatis transformasi kendaraan akan muncul di sini..." class="w-full p-3 rounded-xl glass-input text-gray-200 placeholder-gray-600 resize-none text-sm transition-all duration-300"></textarea>
+                </div>
+            </div>
+
+            <div class="space-y-5 mt-6 border-t border-gray-700/50 pt-6">
+                <div>
+                    <label class="block text-sm font-semibold text-green-400 mb-2">Kecepatan Animasi (Pacing)</label>
+                    <select id="pacingSpeed" class="w-full p-3 rounded-xl glass-input text-gray-200 cursor-pointer appearance-none border-green-500/50 focus:border-green-400 focus:ring-1 focus:ring-green-400">
+                        <option value="Segmented" selected>Classy Segmented (Perakitan Presisi ala Video Referensi!)</option>
+                        <option value="Slow">Slow Motion & Merambat Perlahan (Dramatis)</option>
+                        <option value="Epic">Epic Pacing (Lama di kaki, merakit cepat di helm)</option>
+                        <option value="Standard">Standar (Otomatis dari AI)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-cyan-400 mb-2">Rasio Video</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="rasio" value="9:16" class="peer sr-only" checked>
+                            <div class="p-2 text-center rounded-lg glass-input text-gray-400 peer-checked:text-cyan-300 peer-checked:border-cyan-400 peer-checked:bg-cyan-900/30 transition-all font-mono text-sm">9:16</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="rasio" value="16:9" class="peer sr-only">
+                            <div class="p-2 text-center rounded-lg glass-input text-gray-400 peer-checked:text-cyan-300 peer-checked:border-cyan-400 peer-checked:bg-cyan-900/30 transition-all font-mono text-sm">16:9</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="rasio" value="3:4" class="peer sr-only">
+                            <div class="p-2 text-center rounded-lg glass-input text-gray-400 peer-checked:text-cyan-300 peer-checked:border-cyan-400 peer-checked:bg-cyan-900/30 transition-all font-mono text-sm">3:4</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="rasio" value="1:1" class="peer sr-only">
+                            <div class="p-2 text-center rounded-lg glass-input text-gray-400 peer-checked:text-cyan-300 peer-checked:border-cyan-400 peer-checked:bg-cyan-900/30 transition-all font-mono text-sm">1:1</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-cyan-400 mb-2">Durasi & Scene Split</label>
+                    <select id="durasi" class="w-full p-3 rounded-xl glass-input text-gray-200 cursor-pointer appearance-none">
+                        <option value="1|5">1 Scene / 5 Detik (Short Render)</option>
+                        <option value="1|10" selected>1 Scene / 10 Detik (Standar)</option>
+                        <option value="1|15">1 Scene / 15 Detik</option>
+                        <option value="2|10">2 Scene Berantai / 10 Detik</option>
+                        <option value="2|20">2 Scene Berantai / 20 Detik</option>
+                        <option value="3|15">3 Scene Berantai / 15 Detik</option>
+                        <option value="3|30">3 Scene Berantai / 30 Detik (Epic Edit)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-amber-400 mb-2">Target AI & Mode Interpolasi</label>
+                    <select id="videoAiMode" class="w-full p-3 rounded-xl glass-input text-gray-200 cursor-pointer appearance-none border-amber-500/40 focus:border-amber-400">
+                        <option value="start_end" selected>Start & End Frame (Omni Flash / Kling / Luma)</option>
+                        <option value="standard">Text-to-Video Standar</option>
+                    </select>
+                </div>
+
+                <button id="generateBtn" onclick="generatePrompt()" class="w-full btn-glow text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300 font-display tracking-widest text-lg mt-4">
+                    1. JADIKAN KARYAMU
+                </button>
+
+                <button id="renderGeminiBtn" onclick="renderPreviewGemini()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-6 rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.5)] transition duration-300 font-display tracking-widest text-lg mt-3 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    2. RENDER VISUAL
+                </button>
+            </div>
+        </div>
+
+        <div class="md:col-span-7 glass-panel rounded-2xl p-6 relative flex flex-col">
+            <h2 id="outputTitle" class="text-xl font-display font-bold text-cyan-400 mb-4 border-b border-cyan-500/20 pb-2">Unified Master Script & Visual</h2>
+            
+            <div id="geminiPreviewContainer" class="hidden mb-6 bg-black/50 border border-purple-500/30 rounded-xl p-4 flex flex-col items-center">
+                <h3 class="text-purple-300 font-display font-bold mb-3 text-sm flex items-center gap-2">
+                    <span class="animate-pulse h-2 w-2 bg-purple-500 rounded-full"></span> 
+                    Visual Concept Rendered by Gemini
+                </h3>
+                <div id="geminiLoading" class="hidden flex-col items-center justify-center py-10">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mb-3"></div>
+                    <p class="text-purple-400/80 text-sm font-mono animate-pulse">Memanggil Gemini Flash AI... Memproses Gambar...</p>
+                </div>
+                <div class="relative group mt-2 w-full flex justify-center">
+                    <img id="geminiResultImage" class="hidden max-h-[500px] object-contain rounded-lg shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                    
+                    <button id="downloadImgBtn" onclick="downloadGeminiImage()" class="hidden absolute bottom-2 right-2 md:bottom-4 md:right-4 bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.6)] transition-all transform hover:scale-110 z-10 border border-purple-400" title="Download Gambar (JPG/PNG)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="outputContainer" class="flex-grow overflow-y-auto space-y-4 pb-4">
+                <div class="h-full flex items-center justify-center text-gray-600 flex-col gap-3 opacity-50 min-h-[350px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /></svg>
+                    <p class="font-display tracking-wider">PROMPT & VISUAL AKAN MUNCUL DI SINI</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const VALID_TOKENS = [
+            "ADM11", "adm11", "MK-7X9Q2P", "MK-4K8V1M", "MK-9B2N5X", "MK-3L6P8R", "MK-8W1C4Z",
+            "MK-5T9Y2J", "MK-2Q7E3U", "MK-6V4H9F", "MK-1M8S5D", "MK-0P3K7L"
+        ];
+
+        function playRobotClickSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(900, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.04);
+                
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + 0.04);
+
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sawtooth';
+                osc2.frequency.setValueAtTime(140, ctx.currentTime);
+                osc2.frequency.linearRampToValueAtTime(30, ctx.currentTime + 0.07);
+                
+                gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+                
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                
+                osc2.start();
+                osc2.stop(ctx.currentTime + 0.07);
+            } catch(e) {}
+        }
+
+        function checkAccess() {
+            const rawToken = document.getElementById('tokenInput').value.trim();
+            const input = rawToken.toUpperCase();
+            const err = document.getElementById('authErrorToast');
+
+            const isValid = VALID_TOKENS.some(token => token.toUpperCase() === input);
+
+            if (isValid) {
+                // Simpan token ke localStorage
+                localStorage.setItem('marskey_secure_token', rawToken);
+                
+                document.getElementById('auth-overlay').style.display = 'none';
+                playRobotClickSound();
+            } else {
+                err.style.display = 'block';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeToken = localStorage.getItem('marskey_secure_token');
+
+            const isValid = activeToken && VALID_TOKENS.some(token => token.toUpperCase() === activeToken.trim().toUpperCase());
+            if (isValid) {
+                document.getElementById('auth-overlay').style.display = 'none';
+            } else {
+                localStorage.removeItem('marskey_secure_token');
+                document.getElementById('auth-overlay').style.display = 'flex'; 
+            }
+
+            const tokenInputEl = document.getElementById('tokenInput');
+            if (tokenInputEl) {
+                tokenInputEl.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') checkAccess();
+                });
+            }
+        });
+
+        let currentActiveTab = 'karakter';
+
+        function switchTab(tabName) {
+            playRobotClickSound();
+            currentActiveTab = tabName;
+            const tab1Content = document.getElementById('tab1Content');
+            const tab2Content = document.getElementById('tab2Content');
+            const btn1 = document.getElementById('btnTab1');
+            const btn2 = document.getElementById('btnTab2');
+            const title = document.getElementById('outputTitle');
+            const genBtn = document.getElementById('generateBtn');
+
+            if (tabName === 'karakter') {
+                if (tab1Content) tab1Content.classList.remove('hidden');
+                if (tab2Content) tab2Content.classList.add('hidden');
+                if (btn1) btn1.className = "flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-white bg-gradient-to-r from-cyan-600 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.4)]";
+                if (btn2) btn2.className = "flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-gray-400 hover:text-cyan-300 bg-black/40";
+                toggleMode();
+            } else {
+                if (tab1Content) tab1Content.classList.add('hidden');
+                if (tab2Content) tab2Content.classList.remove('hidden');
+                if (btn2) btn2.className = "flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-[0_0_15px_rgba(59,130,246,0.4)]";
+                if (btn1) btn1.className = "flex-1 py-2.5 px-3 rounded-lg font-display font-bold text-xs transition-all text-center tracking-wider text-gray-400 hover:text-cyan-300 bg-black/40";
+                if (title) {
+                    title.className = "text-xl font-display font-bold text-blue-400 mb-4 border-b border-blue-500/20 pb-2";
+                    title.innerText = "Transform Unit Master Script & Visual";
+                }
+                if (genBtn) {
+                    genBtn.style.background = "linear-gradient(90deg, #2563eb, #0284c7)";
+                }
+            }
+        }
+
+        const presets = {
+            chronos_watch: {
+                desc: "Zirah Heavy Mech hitam-silver dengan garis neon biru menyala terang, merayap presisi dari jam tangan pergelangan ala video referensi.",
+                prompt: "Cinematic 8k footage, ultra-realistic VFX. The character firmly taps the smartwatch on their wrist, triggering a surge of bright electric blue energy. STRICT CREEPING ARM ASSEMBLY: The smartwatch liquefies and physically crawls in glowing nano-metal tendrils outward along the hand, fingers, and forearm, constructing heavy silver and black segmented gauntlets piece-by-piece smoothly. ZERO instant pop-in. Energy cascades instantly to form a robust chest cuirass, sweeping down to completely encase thighs and legs (ZERO BARE SKIN). Finally, an aggressive fully-enclosed tactical mecha helmet featuring prominent sharp swept-back crest horns and electric blue glowing visor slits builds strictly upward from the high neck collar, snapping together piece-by-piece laterally around the head. ZERO falling from above, ZERO floating, 100% full head enclosure with zero human face or skin visible."
+            },
+            exosuit: {
+                desc: "Konsep perakitan militer taktis dengan plat baja berat, piston hidrolik, dan helm tempur.",
+                prompt: "Cinematic 8k footage, ultra-realistic VFX. Strict bottom-to-top mechanical assembly sequence. Heavy metallic greaves violently lock onto shins, pneumatic pistons and steel plating construct upwards, completely encasing thighs with ABSOLUTE FULL COVERAGE (OBLITERATE ALL BARE SKIN, zero shorts visible, zero skin visible). FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into heavy armored boots. Tactical chest cuirass snaps shut, heavy shoulder guards lock, arms lock in sequence, and an aggressive armored mecha helmet with prominent swept-back crest horns seals the face perfectly with zero skin visible."
+            },
+            mecha: {
+                desc: "Zirah robot raksasa (Gundam style) berukuran masif dengan sabuk energi.",
+                prompt: "Cinematic 8k footage. Massive Mecha/Gundam style robotic transformation from the ground up. Giant mechanical boots lock on. Heavy steel robotic thigh armor assembles instantly covering ALL bare skin. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into giant robotic boots. Glowing energy core ignites on the waist belt. Robotic arms extend, a massive mecha helmet featuring prominent tactical crest horns locks over the head, fully enclosing the face."
+            },
+            nanotech: {
+                desc: "Nano-Tech Merambat Cepat dari DUA platform pijakan terpisah.",
+                prompt: "Cinematic 8k footage, ultra-realistic VFX. Sleek, aerodynamic Nano-tech red and silver metallic suit assembles through precision segmented mechanical locking. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into sleek armored boots. Micro-hexagonal plating constructs piece-by-piece, forming an absolute full lower body armor encasing thighs completely. ZERO BARE SKIN. High-tech energy buckle forms and ignites on the WAIST BELT. Motorized aerodynamic helmet with aggressive crest horns seamlessly constructs strictly upward into a full enclosed visor."
+            },
+            national: {
+                desc: "Zirah kebanggaan negara dengan ornamen budaya, bendera, dan sabuk energi.",
+                prompt: "Cinematic 8k footage, ultra-realistic VFX. Epic bottom-to-top mechanical assembly of a majestic National Pride cultural armor. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into heavy ornate armored boots. Ornate metallic greaves lock onto shins with cultural engravings, golden armor plating and battle skirts assemble over thighs covering all skin. A detailed chestplate featuring majestic national symbols snaps into place. Fully sealed ceremonial helmet with prominent crest horns locks over the face."
+            },
+            symbiote: {
+                desc: "Alien bio-organik (ala Venom) di mana cairan hitam merayap menutupi tubuh.",
+                prompt: "Cinematic 8k bio-horror VFX. Alien organic symbiote biomass violently crawling from the feet upwards. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into organic clawed alien feet. Black living tendrils and wet organic muscle fibers completely wrap shins and thighs, forming an impenetrable living armor over the legs (ZERO BARE SKIN). The alien biomass consumes the torso, wrapping the arms, and finally encasing the head with a monstrous full-enclosed face, white jagged eyes, and sharp fangs."
+            },
+            celestial: {
+                desc: "Zirah bernuansa malaikat/dewa dari lempengan emas murni dengan cahaya putih suci.",
+                prompt: "8k divine fantasy VFX. Swirling pure white light and glowing halos forge solid heavy angelic paladin armor from the ground up. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into holy golden boots. Majestic golden plate armor completely covers thighs (ZERO BARE SKIN). Radiant glowing chestplate constructs, feathered wings of pure light erupt from the back, and a divine halo-crown helmet with sharp crests encloses the face flawlessly."
+            },
+            ninja: {
+                desc: "Zirah ramping serat karbon hitam legam dengan garis neon dan efek asap ninja.",
+                prompt: "8k dark sci-fi fantasy. Solidifying black smoke and shadow forming an impenetrable sleek stealth cyber-ninja armor from feet upwards. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into stealth cyber-tabi boots. Shadow-woven full pants and carbon-fiber plates covering thighs completely (ZERO BARE SKIN). Sleek glowing neon accents, cybernetic ninja mask with swept-back crest horns fully enclosing the face."
+            },
+            elemental: {
+                desc: "Elemen alam liar (es kristal, api vulkanik, atau petir) melebur jadi zirah titan.",
+                prompt: "8k elemental magic VFX. Raw destructive elemental energy (swirling fire, cracking ice, and lightning) solidifies into thick heavy Titan armor from the ground up. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into boots made of solid elemental stone. Elemental plating completely encases thighs (ZERO BARE SKIN). A roaring elemental chestplate forms, and an elemental mask with crest horns seals the face entirely."
+            },
+            samurai: {
+                desc: "Ksatria samurai Jepang cybernetic dengan ornamen Oni, kabel optik, dan energi neon.",
+                prompt: "Cinematic 8k. Cybernetic Ronin samurai transformation. High-tech traditional Japanese armor forms from the bottom up. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into armored cyber-sandals. Heavy layered thigh guards (Sode) assemble, leaving NO BARE SKIN. Intricate chest armor locks in, neon-glowing optical cables connect. A terrifying cybernetic Oni demon mask with sharp horned crests slams shut over the face."
+            },
+            madmax: {
+                desc: "Zirah bertahan hidup pasca-apokaliptik terbuat dari rongsokan besi dan plat baja kasar.",
+                prompt: "Cinematic 8k gritty post-apocalyptic VFX. Scrap metal, rusty steel plates, and scavenged car parts violently clamping together to form heavy Mad Max scavenger armor from the ground up. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into heavy steel-toed combat boots. Welded steel plates completely wrap the thighs (ZERO BARE SKIN). Heavy iron chest plate, exposed wires, and a gas-mask scavenger helmet enclosing the head."
+            },
+            steampunk: {
+                desc: "Zirah retro-futuristik Victorian dengan roda gigi kuningan dan uap bertekanan tinggi.",
+                prompt: "8k steampunk fantasy. High-pressure steam vents hissing as brass and copper mechanical clockwork armor assembles from the boots up. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into heavy brass steampunk boots. Interlocking gears and Victorian steel plating completely cover the thighs (ZERO BARE SKIN). Brass boiler chestplate ignites, mechanical arms lock, and a leather-and-brass goggle mask seals the face."
+            },
+            marine: {
+                desc: "Zirah tempur ruang angkasa marinir galaksi yang sangat kokoh dengan lampu taktis.",
+                prompt: "Cinematic 8k sci-fi. Heavy Galactic Space Marine combat suit assembly. Bulky aerospace-grade metal boots lock on. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into heavy lunar combat boots. Thick environmental sealing armor completely encases thighs and legs (ZERO BARE SKIN). Massive tactical chest plate with thrusters, heavy gauntlets, and a black-visored space commando helmet with crest horns sealing perfectly."
+            },
+            crystal: {
+                desc: "Pertumbuhan magis zirah tajam dari kristal kuarsa murni atau berlian prismatik.",
+                prompt: "8k magical realism VFX. Sharp glowing crystalline structures growing organically from the ground up into heavy indestructible armor. FOOTWEAR OVERRIDE: Original shoes MUST instantly morph into jagged prism-crystal boots. Prism-greaves and full-length crystal plating locking over thighs seamlessly (ZERO BARE SKIN). Radiant diamond chestplate forms, and a faceted crystal helmet with sharp crests encloses the face flawlessly."
+            }
+        };
+
+        const vehiclePresets = {
+            brawler: {
+                desc: "Robot petarung kelas berat. Suku cadang membesar dengan piston kokoh tanpa merubah latar belakang lingkungan.",
+                prompt: "Cinematic 8k, ultra-realistic mechanical VFX. Seamless mechanical transformation sequence on the current road. The vehicle's chassis expands into a massive, heavily armored Sentient Brawler Mech. Wheels and suspension shift into thick, reinforced hydraulic leg joints. Mechanical pistons and heavy armor plates snap into place with extreme industrial precision. ZERO HUMAN DRIVERS. BACKGROUND STAYS FIRMLY LOCKED."
+            },
+            recon: {
+                desc: "Robot gesit dan ramping bergaya cyber-ninja. Panel bodi bergeser mulus membentuk armor aerodinamis.",
+                prompt: "Cinematic 8k, ultra-realistic mechanical VFX. Rapid, agile mechanical transformation sequence on the exact same spot. Aerodynamic fairings and panels shift smoothly, reconfiguring into a sleek, fast Sentient Recon Robot. Wheels split into agile foot servos and spine thrusters. Headlights form glowing ocular sensors. ZERO HUMAN DRIVERS. BACKGROUND STAYS FIRMLY LOCKED."
+            },
+            cruiser: {
+                desc: "Mecha taktis perkotaan (Khusus Motor Matic/Skuter/Vario). Roda, stang, dan bodi bertransformasi menjadi robot petarung jalanan.",
+                prompt: "Cinematic 8k, ultra-realistic mechanical VFX. Grounded urban mechanical transformation sequence. The scooter/motorcycle mechanically unfolds: front fork and handlebars rotate into an armored mecha chest and shoulder guards, rear wheels and dual swingarms shift downwards to form reinforced mechanical legs. Exhaust pipe converts into tactical gear. The vehicle's exact black/metallic paint finish is 100% retained on the robot plating. ZERO HUMAN RIDERS. ZERO DESERT MORPHING. ENVIRONMENT REMAINS FIXED."
+            },
+            aerial: {
+                desc: "Robot penyerang udara. Baling-baling/sayap menjadi sayap baja bersenjata atau pendorong.",
+                prompt: "Cinematic 8k, ultra-realistic VFX. Complex aerospace mechanical transformation sequence. Fuselage unhinges, wings folding and rotating into sweeping armored flight wings. Rotors or turbines relocate to the back as active plasma thrusters. Sleek aerodynamic limbs lock into place firmly. ZERO HUMAN PILOTS. BACKGROUND STAYS FIRMLY LOCKED."
+            },
+            beast: {
+                desc: "Mode Binatang Mekanik (Cyber-Beast). Berubah menjadi monster robot buas namun tetap di aspal jalanan.",
+                prompt: "Cinematic 8k, ultra-realistic mechanical VFX. Mechanical reassembly sequence. The vehicle reconfigures into a quadruped Cybernetic Beast (mechanical cyber-panther/dragon). Engine block forms a roaring steel jaw, headlights become glowing predator eyes, and wheel arches form powerful claws. Savage robotic animal stance on the exact current asphalt road. ZERO MORPHING INTO A DESERT. BACKGROUND ENVIRONMENT REMAINS FIXED."
+            }
+        };
+
+        function selectVehicleWeaponPreset() {
+            playRobotClickSound();
+            const select = document.getElementById('presetSenjataKendaraan');
+            const customInput = document.getElementById('customWeaponKendaraanInput');
+            if (select.value === 'custom') {
+                customInput.value = '';
+                customInput.focus();
+            } else {
+                customInput.value = select.value;
+            }
+            updateVehicleDynamicPrompt();
+        }
+
+        function updateVehiclePresetData() {
+            const presetKey = document.getElementById('presetKendaraan').value;
+            const descEl = document.getElementById('descKendaraan');
+            if (presetKey && vehiclePresets[presetKey]) {
+                descEl.innerText = vehiclePresets[presetKey].desc;
+                descEl.classList.remove('hidden');
+                updateVehicleDynamicPrompt();
+            } else {
+                descEl.classList.add('hidden');
+                document.getElementById('textArahanKendaraan').value = "";
+            }
+        }
+
+        function updateVehicleDynamicPrompt() {
+            const presetKey = document.getElementById('presetKendaraan').value;
+            const textArea = document.getElementById('textArahanKendaraan');
+            if (presetKey && vehiclePresets[presetKey]) {
+                let basePrompt = vehiclePresets[presetKey].prompt;
+                const weaponVal = document.getElementById('customWeaponKendaraanInput').value.trim();
+                if (weaponVal) {
+                    basePrompt += `\n\n[ROBOT WEAPON INTEGRATION: The transformed mecha unfolds and equips: [${weaponVal}], seamlessly built from the vehicle's internal components.]`;
+                }
+                textArea.value = basePrompt;
+                textArea.classList.add('border-blue-400', 'bg-blue-900/30');
+                setTimeout(() => textArea.classList.remove('border-blue-400', 'bg-blue-900/30'), 500);
+            }
+        }
+
+        function selectWeaponPreset() {
+            playRobotClickSound();
+            const select = document.getElementById('presetSenjata');
+            const customInput = document.getElementById('customWeaponInput');
+            if (select.value === 'custom') {
+                customInput.value = '';
+                customInput.focus();
+            } else {
+                customInput.value = select.value;
+            }
+            updateDynamicPrompt();
+        }
+
+        function updatePresetData() {
+            const presetKey = document.getElementById('presetKombinasi').value;
+            const descEl = document.getElementById('deskripsiSingkat');
+            const countryBox = document.getElementById('countryInputBox');
+            const nanotechBox = document.getElementById('nanotechOptionsBox');
+            
+            if (presetKey && presets[presetKey]) {
+                descEl.innerText = presets[presetKey].desc;
+                descEl.classList.remove('hidden');
+
+                if (presetKey === 'national') {
+                    countryBox.classList.remove('hidden');
+                    nanotechBox.classList.add('hidden');
+                } else if (presetKey === 'nanotech') {
+                    nanotechBox.classList.remove('hidden');
+                    countryBox.classList.add('hidden');
+                } else {
+                    countryBox.classList.add('hidden');
+                    nanotechBox.classList.add('hidden');
+                }
+                updateDynamicPrompt();
+            } else {
+                descEl.classList.add('hidden');
+                countryBox.classList.add('hidden');
+                nanotechBox.classList.add('hidden');
+                document.getElementById('textArahan').value = "";
+            }
+        }
+
+        function updateDynamicPrompt() {
+            const presetKey = document.getElementById('presetKombinasi').value;
+            const textArea = document.getElementById('textArahan');
+            const relicVal = document.getElementById('relicTrigger').value;
+            
+            if (presetKey && presets[presetKey]) {
+                let basePrompt = presets[presetKey].prompt;
+
+                if (relicVal === 'watch') {
+                    basePrompt = `Cinematic 8k footage, ultra-realistic VFX. The character firmly taps the smartwatch on their wrist, triggering a surge of bright electric blue energy. STRICT CREEPING ARM ASSEMBLY: The smartwatch liquefies and physically crawls in glowing nano-metal tendrils outward along the hand, fingers, and forearm, constructing heavy silver and black segmented gauntlets piece-by-piece smoothly. ZERO instant pop-in. Energy cascades instantly to form a robust chest cuirass, sweeping down to completely encase thighs and legs (ZERO BARE SKIN). Finally, an aggressive fully-enclosed tactical mecha helmet with prominent sharp swept-back crest horns builds strictly upward from the high neck collar, snapping together piece-by-piece laterally around the head with glowing blue visor slits. ZERO falling from above, ZERO floating.`;
+                } else if (relicVal === 'belt') {
+                    basePrompt = `Cinematic 8k footage. The character touches the Henshin belt buckle on their waist, emitting a massive surge of energy that flows outward to the torso, down the legs, and up to construct the full armor.`;
+                } else if (relicVal === 'ring') {
+                    basePrompt = `Cinematic 8k footage. The character twists the energy ring on their finger, sending a flash of light through the hand, arms, torso, legs, and completely sealing the head.`;
+                } else if (relicVal === 'pendant') {
+                    basePrompt = `Cinematic 8k footage. The character taps the glowing amulet pendant on their chest, releasing a wave of armor plating that expands across the entire body.`;
+                }
+
+                const weaponVal = document.getElementById('customWeaponInput').value.trim();
+                if (weaponVal) {
+                    basePrompt += `\n\n[HEAVY WEAPON & GEAR INTEGRATION: The character materializes and wields/mounts heavy tactical gear: [${weaponVal}], perfectly integrated into the robotic plating.]`;
+                }
+
+                if (presetKey === 'national') {
+                    const countryVal = document.getElementById('countryName').value.trim();
+                    if (countryVal) {
+                        basePrompt += `\n\n[SPECIFIC NATIONAL THEME: Perfectly themed around ${countryVal.toUpperCase()}. Use highly accurate flag colors, national emblems, and authentic cultural engravings specific to ${countryVal} applied elegantly onto the armor.]`;
+                    }
+                }
+
+                if (presetKey === 'nanotech') {
+                    const suitSelect = document.getElementById('nanotechSuit');
+                    if (suitSelect) {
+                        const suitType = suitSelect.value;
+                        const suitText = suitSelect.options[suitSelect.selectedIndex].text;
+                        
+                        if (suitText.includes("Blue Cobalt") || suitText.includes("Perak Biru")) {
+                            basePrompt = basePrompt.replace("emitting red light", "emitting intense blue light");
+                            basePrompt = basePrompt.replace("red and silver metallic suit", "sleek blue and cobalt metallic suit");
+                            basePrompt = basePrompt.replace("buckle forms and ignites", "buckle forms and emits a powerful blue neon glow");
+                        } else if (suitType === 'Sleek vibrant red and silver metallic nano-tech armor with segmented locking') {
+                            basePrompt = basePrompt.replace("buckle forms and ignites", "buckle forms and emits a powerful red neon glow");
+                        } else if (suitText.includes("Hijau") || suitText.includes("Neon Hijau") || suitText.includes("Dragon Buster")) {
+                            basePrompt = basePrompt.replace("emitting red light", "emitting toxic emerald-green light");
+                            basePrompt = basePrompt.replace("red and silver metallic suit", "dark emerald-green and black metallic dragon-scale suit");
+                            basePrompt = basePrompt.replace("buckle forms and ignites", "buckle forms and emits a radiant green neon glow");
+                        } else if (suitText.includes("Stealth Suit")) {
+                            basePrompt = basePrompt.replace("emitting red light", "emitting stealth blue neon light");
+                            basePrompt = basePrompt.replace("red and silver metallic suit", "matte black carbon-fiber stealth armor");
+                        }
+                        
+                        basePrompt += `\n\n[SPECIFIC ARMOR OVERRIDE: The armor formed MUST strictly be ${suitType}. Maintain the segmented precision assembly sequence.]`;
+                    }
+                }
+
+                textArea.value = basePrompt;
+                textArea.classList.add('border-cyan-400', 'bg-cyan-900/30', 'shadow-[0_0_15px_rgba(34,211,238,0.4)]');
+                setTimeout(() => textArea.classList.remove('border-cyan-400', 'bg-cyan-900/30', 'shadow-[0_0_15px_rgba(34,211,238,0.4)]'), 500);
+            }
+        }
+
+        function toggleMode() {
+            playRobotClickSound();
+            if (currentActiveTab !== 'karakter') return;
+            const mode = document.querySelector('input[name="modeSkenario"]:checked').value;
+            const btn = document.getElementById('generateBtn');
+            const title = document.getElementById('outputTitle');
+            const gridContainer = document.getElementById('uploadGridContainer');
+            const boxPendamping = document.getElementById('boxPendamping');
+            const guardianOptions = document.getElementById('guardianOptions');
+
+            if(mode === 'guardian') {
+                btn.style.background = "linear-gradient(90deg, #7c3aed, #a855f7)";
+                title.className = "text-xl font-display font-bold text-purple-400 mb-4 border-b border-purple-500/20 pb-2";
+                title.innerText = "Guardian Particle-Fusion Script";
+                if(boxPendamping) boxPendamping.style.display = "flex";
+                if(guardianOptions) guardianOptions.classList.remove('hidden');
+                if(gridContainer) {
+                    gridContainer.classList.remove('grid-cols-2');
+                    gridContainer.classList.add('grid-cols-3');
+                }
+            } else {
+                btn.style.background = "linear-gradient(90deg, #0284c7, #0ea5e9)";
+                title.className = "text-xl font-display font-bold text-cyan-400 mb-4 border-b border-cyan-500/20 pb-2";
+                title.innerText = "Unified Master Script & Visual";
+                if(boxPendamping) boxPendamping.style.display = "none";
+                if(guardianOptions) guardianOptions.classList.add('hidden');
+                if(gridContainer) {
+                    gridContainer.classList.remove('grid-cols-3');
+                    gridContainer.classList.add('grid-cols-2');
+                }
+            }
+        }
+
+        function previewImage(input, imgId, textId) {
+            playRobotClickSound();
+            const img = document.getElementById(imgId);
+            const textDiv = document.getElementById(textId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.classList.remove('opacity-0');
+                    img.classList.add('opacity-100');
+                    textDiv.classList.add('bg-black/70', 'p-1', 'rounded-md', 'backdrop-blur-sm'); 
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            document.getElementById('errorMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function repairUI() {
+            playRobotClickSound();
+            ['uploadKarakter', 'uploadTambahan', 'uploadBackground', 'uploadKendaraan', 'uploadBgKendaraan'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).value = "";
+            });
+            ['previewKarakter', 'previewTambahan', 'previewBackground', 'previewKendaraan', 'previewBgKendaraan'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.src = ""; el.classList.remove('opacity-100'); el.classList.add('opacity-0'); }
+            });
+            ['textKarakter', 'textTambahanBox', 'textBackground', 'textKendaraan', 'textBgKendaraan'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).classList.remove('bg-black/70', 'p-1', 'rounded-md', 'backdrop-blur-sm');
+            });
+            
+            document.getElementById('presetKombinasi').value = "";
+            document.getElementById('relicTrigger').selectedIndex = 0;
+            document.getElementById('presetSenjata').selectedIndex = 0;
+            document.getElementById('customWeaponInput').value = "";
+            
+            if (document.getElementById('presetKendaraan')) document.getElementById('presetKendaraan').value = "";
+            if (document.getElementById('presetSenjataKendaraan')) document.getElementById('presetSenjataKendaraan').selectedIndex = 0;
+            if (document.getElementById('customWeaponKendaraanInput')) document.getElementById('customWeaponKendaraanInput').value = "";
+            
+            updatePresetData();
+            updateVehiclePresetData();
+
+            document.getElementById('durasi').selectedIndex = 1;
+            document.getElementById('pacingSpeed').selectedIndex = 0;
+            if (document.getElementById('videoAiMode')) document.getElementById('videoAiMode').selectedIndex = 0;
+            document.querySelector('input[name="rasio"][value="9:16"]').checked = true;
+            document.querySelector('input[name="modeSkenario"][value="standar"]').checked = true;
+            switchTab('karakter');
+            
+            document.getElementById('geminiPreviewContainer').classList.add('hidden');
+            const downloadBtn = document.getElementById('downloadImgBtn');
+            if(downloadBtn) downloadBtn.classList.add('hidden');
+            
+            document.getElementById('outputContainer').innerHTML = `
+                <div class="h-full flex items-center justify-center text-gray-600 flex-col gap-3 opacity-50 min-h-[350px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /></svg>
+                    <p class="font-display tracking-wider">PROMPT & VISUAL AKAN MUNCUL DI SINI</p>
+                </div>
+            `;
+        }
+
+        function copyToClipboard(id) {
+            playRobotClickSound();
+            const ta = document.getElementById(id);
+            ta.select();
+            document.execCommand("copy");
+            
+            const toast = document.createElement("div");
+            toast.className = "fixed bottom-5 right-5 bg-cyan-500/90 text-white px-6 py-3 rounded-xl shadow-lg font-semibold transform transition-all duration-300 translate-y-0 opacity-100 flex items-center gap-2 backdrop-blur-sm z-50";
+            toast.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Script Berhasil Disalin!`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function downloadText(id, filename) {
+            playRobotClickSound();
+            const text = document.getElementById(id).value;
+            const blob = new Blob([text], { type: "text/plain" });
+            const anchor = document.createElement("a");
+            anchor.download = filename + ".txt";
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        function downloadGeminiImage() {
+            playRobotClickSound();
+            const img = document.getElementById('geminiResultImage');
+            if (!img.src || img.src === window.location.href) return;
+            let ext = img.src.includes("image/jpeg") || img.src.includes("image/jpg") ? "jpg" : "png";
+            
+            fetch(img.src)
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const anchor = document.createElement("a");
+                    anchor.href = url;
+                    anchor.download = "Marskey_Visual_Render." + ext;
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    document.body.removeChild(anchor);
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+
+        async function renderPreviewGemini() {
+            playRobotClickSound();
+            
+            let mainImg, bgImg, promptText;
+            
+            if (currentActiveTab === 'karakter') {
+                mainImg = document.getElementById('previewKarakter');
+                bgImg = document.getElementById('previewBackground');
+                promptText = document.getElementById('textArahan').value;
+                if (!mainImg.src || mainImg.src === window.location.href || mainImg.classList.contains('opacity-0') || !mainImg.src.startsWith('data:')) {
+                    return showError("Harap upload gambar Subjek Utama terlebih dahulu untuk merender visual!");
+                }
+            } else {
+                mainImg = document.getElementById('previewKendaraan');
+                bgImg = document.getElementById('previewBgKendaraan');
+                promptText = document.getElementById('textArahanKendaraan').value;
+                if (!mainImg.src || mainImg.src === window.location.href || mainImg.classList.contains('opacity-0') || !mainImg.src.startsWith('data:')) {
+                    return showError("Harap upload gambar Kendaraan terlebih dahulu untuk merender visual!");
+                }
+            }
+
+            if (!promptText) return showError("Harap pilih preset dan hasilkan script dulu sebelum render!");
+
+            const container = document.getElementById('geminiPreviewContainer');
+            const loading = document.getElementById('geminiLoading');
+            const resultImg = document.getElementById('geminiResultImage');
+            const btn = document.getElementById('renderGeminiBtn');
+            const downloadBtn = document.getElementById('downloadImgBtn');
+
+            container.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            resultImg.classList.add('hidden');
+            if(downloadBtn) downloadBtn.classList.add('hidden');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> MENGANALISIS VISUAL...`;
+
+            try {
+                let base64Data = mainImg.src.split(',')[1];
+                let mimeType = mainImg.src.split(';')[0].split(':')[1];
+                let promptParts = [];
+
+                let visualConcept = "";
+                if (currentActiveTab === 'karakter') {
+                    const sel = document.getElementById('presetKombinasi');
+                    visualConcept = sel ? sel.options[sel.selectedIndex].text : "Futuristic Mecha Armor";
+                    promptParts = [
+                        { text: `Analyze this image. Describe a photorealistic character transformation based on this concept: ${visualConcept}. OUTPUT ONLY SHORT KEYWORDS IN ENGLISH. Max 30 words. NO markdown, NO sentences.` },
+                        { inlineData: { mimeType: mimeType, data: base64Data } }
+                    ];
+                } else {
+                    const sel = document.getElementById('presetKendaraan');
+                    visualConcept = sel ? sel.options[sel.selectedIndex].text : "Sentient Robotic Vehicle Mecha";
+                    promptParts = [
+                        { text: `Analyze this vehicle. Describe a highly detailed mecha robot transformation based on: ${visualConcept}. OUTPUT ONLY SHORT KEYWORDS IN ENGLISH. Max 30 words. NO markdown, NO sentences.` },
+                        { inlineData: { mimeType: mimeType, data: base64Data } }
+                    ];
+                }
+
+                const payload = {
+                    contents: [{ role: "user", parts: promptParts }],
+                    generationConfig: { 
+                        temperature: 0.7,
+                        maxOutputTokens: 60 
+                    }
+                };
+
+                btn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> MENGHUBUNGI SERVER...`;
+                
+                // MENGHUBUNGI BACKEND VERCEL, BUKAN GOOGLE LANGSUNG
+                const apiUrl = `/api/gemini`; 
+                let textResponse = "";
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`${errorData.error || response.statusText}`);
+                    }
+                    const result = await response.json();
+                    textResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (!textResponse || textResponse.trim() === "") {
+                        throw new Error("Teks kosong (diblokir oleh Safety Filter Gemini).");
+                    }
+                } catch (apiError) {
+                    console.warn("Merespons dengan Bypass Mode:", apiError.message);
+                    showError("Bypass Mode: Menggunakan deskripsi darurat...");
+                    textResponse = `highly detailed ${visualConcept}, intricate mechanical parts, futuristic`;
+                }
+
+                if (textResponse) {
+                    btn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> MERENDER VISUAL HD...`;
+                    
+                    const magicKeywords = "Award winning masterpiece, hyperrealistic 8k CGI, Unreal Engine 5 render, extremely detailed mecha armor, sharp focus, cinematic lighting, photorealistic, intricate sci-fi details, vibrant colors, ";
+                    const cleanPrompt = textResponse.replace(/[^a-zA-Z0-9, ]/g, '').trim().slice(0, 150); 
+                    const finalPrompt = encodeURIComponent(magicKeywords + cleanPrompt + ", dark moody background");
+                    
+                    const ratio = document.querySelector('input[name="rasio"]:checked').value;
+                    let w = 1080, h = 1920;
+                    if(ratio === '16:9') { w = 1920; h = 1080; }
+                    else if(ratio === '1:1') { w = 1080; h = 1080; }
+                    else if(ratio === '3:4') { w = 1080; h = 1440; }
+                    
+                    const imgUrl = `https://image.pollinations.ai/prompt/${finalPrompt}?model=flux&width=${w}&height=${h}&nologo=true&seed=${Math.floor(Math.random() * 99999)}`;
+                    
+                    resultImg.onload = function() {
+                        loading.classList.add('hidden');
+                        loading.classList.remove('flex');
+                        resultImg.classList.remove('hidden');
+                        if(downloadBtn) downloadBtn.classList.remove('hidden');
+                        btn.disabled = false;
+                        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> RENDER ULANG VISUAL`;
+                        showError("Render sukses! Catatan: Ini preview AI Generative.");
+                    };
+
+                    resultImg.onerror = function() {
+                        showError("Gagal merender gambar dari server pusat. Silakan coba lagi.");
+                        loading.classList.add('hidden');
+                        loading.classList.remove('flex');
+                        btn.disabled = false;
+                        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> RENDER VISUAL`;
+                    };
+                    
+                    resultImg.src = imgUrl;
+
+                } else {
+                    throw new Error("Sistem mengembalikan teks kosong.");
+                }
+
+            } catch (error) {
+                console.error("Error rendering image:", error);
+                showError(`Gagal: ${error.message}`);
+                loading.classList.add('hidden');
+                loading.classList.remove('flex');
+                btn.disabled = false;
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> RENDER VISUAL`;
+            }
+        }
+
+        function generatePrompt() {
+            playRobotClickSound();
+            if (currentActiveTab === 'karakter') {
+                const presetKey = document.getElementById('presetKombinasi').value;
+                if (!presetKey) return showError("Harap pilih Preset Konsep & Gaya terlebih dahulu!");
+            } else {
+                const presetKey = document.getElementById('presetKendaraan').value;
+                if (!presetKey) return showError("Harap pilih Preset Cyber-Titan (Kendaraan) terlebih dahulu!");
+            }
+
+            const btn = document.getElementById('generateBtn');
+            btn.innerHTML = `MERACIK MASTER SCRIPT...`;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            setTimeout(() => {
+                const ratio = document.querySelector('input[name="rasio"]:checked').value;
+                const durasiVal = document.getElementById('durasi').value;
+                const pacingVal = document.getElementById('pacingSpeed').value;
+                const videoAiMode = document.getElementById('videoAiMode') ? document.getElementById('videoAiMode').value : 'start_end';
+                const relicVal = document.getElementById('relicTrigger').value;
+                const [sceneCount, totalSeconds] = durasiVal.split('|').map(Number);
+                const durationPerScene = totalSeconds / sceneCount;
+
+                let containerHtml = `<div class="space-y-6 pb-4">`;
+                let fullDownloadText = "";
+
+                if (currentActiveTab === 'karakter') {
+                    const presetSelect = document.getElementById('presetKombinasi');
+                    const presetJudul = presetSelect.options[presetSelect.selectedIndex].text;
+                    let userText = document.getElementById('textArahan').value;
+                    const mode = document.querySelector('input[name="modeSkenario"]:checked').value;
+                    const charFile = document.getElementById('uploadKarakter').files[0];
+                    const addFile = document.getElementById('uploadTambahan').files[0];
+                    const bgFile = document.getElementById('uploadBackground').files[0];
+                    const charName = charFile ? charFile.name : "Karakter_Utama_Ref.png";
+                    const addName = addFile ? addFile.name : "Companion_Animal_Ref.png";
+                    const bgName = bgFile ? bgFile.name : "Background_Auto_Extracted_From_Subject";
+                    const addonWings = document.getElementById('addonWings') && document.getElementById('addonWings').checked;
+                    let dissolveText = "gracefully dissolves into glowing energy particles. The particles flow into the character's body.";
+
+                    let platformInstruction = relicVal ? 
+                        `[RELIC TRIGGER ACTIVE (${relicVal.toUpperCase()}): NO FLOOR PLATFORMS. The transformation originates entirely from the ${relicVal} on the body. Zero glowing floor discs.]` : 
+                        `[FLOOR PLATFORMS ACTIVE: Glowing circular high-tech energy floor platforms appear directly under feet.]`;
+
+                    let interpolationPhysics = `
+[START & END FRAME TRANSITION PHYSICS & STABILITY]
+1. ROOT POSITION & STANCE ANCHOR LOCK: Character feet and center of gravity remain strictly fixed at coordinate (0,0). ZERO backward stepping, ZERO sliding, ZERO moonwalking, ZERO lateral feet displacement.
+2. CREEPING ARM ASSEMBLY (NO POP-IN): If smartwatch is active, energy originates smoothly from the wrist, physically creeping outward in nano-metal tendrils along the forearm and hands. ZERO instant pop-in.
+3. UPWARD NECK-COLLAR HELMET ASSEMBLY (NO FALLING/FLOATING): The helmet plates assemble strictly upward from the high neck collar, snapping together piece-by-piece laterally and front-to-back around the head. ZERO falling from above, ZERO floating.
+4. BODY INTEGRITY LOCK: Head, torso, and limbs remain 100% attached at all times. Zero decapitation, zero torso disappearance.`;
+
+                    let strictEnforcementsText = `
+[STRICT ENFORCEMENTS]
+- ROOT ANCHOR LOCK: Character feet NEVER move backward or slide.
+- CREEPING PROPAGATION: Armor spreads progressively like liquid metal; zero sudden pop-in.
+- UPWARD HELMET SEAL: Helmet builds strictly upward from the neck collar.
+- 100% HEAD ENCLOSURE: Zero skin, face, or hair visible in the final frame.
+- ENVIRONMENT LOCK: Room and background remain 100% identical.`;
+
+                    for (let i = 1; i <= sceneCount; i++) {
+                        let startT = (i - 1) * durationPerScene;
+                        let endT = i * durationPerScene;
+                        let stageDesc = mode === 'guardian' ? `Full sequence (${startT.toFixed(1)}s-${endT.toFixed(1)}s): Companion entity from (${addName}) ${dissolveText}` : `Full sequence (${startT.toFixed(1)}s-${endT.toFixed(1)}s): Precision assembly locking perfectly to the timeline below.`;
+                        let continuityNote = i > 1 ? `\n[CONTINUITY NOTE: Maintain exact ending visual state from Scene ${i-1} as the starting frame.]` : "";
+                        
+                        let seg = durationPerScene / 5;
+                        let t0 = startT, t1 = startT + seg, t2 = startT + (seg * 2), t3 = startT + (seg * 3), t4 = startT + (seg * 4), t5 = endT;
+                        let wingsTimeline = (addonWings && mode === 'guardian') ? " Massive mechanical steel wings unfurl majestically." : "";
+
+                        let timelinePacing = `
+[STRICT SECOND-BY-SECOND TIMELINE]
+- ${t0.toFixed(1)}s to ${t1.toFixed(1)}s: TRIGGER & ARMS. ${platformInstruction} Watch/relic energy surges; arm plating creeps smoothly outward along forearms and hands.
+- ${t1.toFixed(1)}s to ${t2.toFixed(1)}s: TORSO & CHEST. Plating constructs over the chest and shoulders.
+- ${t2.toFixed(1)}s to ${t3.toFixed(1)}s: LEGS & THIGHS. Armor sweeps down to completely encase thighs and shins.
+- ${t3.toFixed(1)}s to ${t4.toFixed(1)}s: WEAPON HILT. Weapon hilt condenses in hand.
+- ${t4.toFixed(1)}s to ${t5.toFixed(1)}s: UPWARD HELMET SEAL. Helmet builds strictly upward from the neck collar, sealing the head completely.${wingsTimeline}`;
+
+                        let unifiedText = `==================================================
+UNIFIED MASTER SCRIPT - SCENE ${i} (${startT.toFixed(1)}s - ${endT.toFixed(1)}s)
+==================================================
+Ref: ${charName}, ${bgName}
+Style: ${presetJudul}
+Ratio: ${ratio}
+Relic Mode: ${relicVal ? relicVal.toUpperCase() : 'NONE (FLOOR PLATFORMS)'}
+Target: ${videoAiMode === 'start_end' ? 'Start & End Frame Mode' : 'Standard Text-to-Video'}
+${continuityNote}
+
+[ACTION & MECHANICS]
+${userText}
+${stageDesc}
+${timelinePacing}
+${interpolationPhysics}
+
+${strictEnforcementsText}
+
+[NEGATIVE PROMPT]
+stepping back, sliding backward, gliding backwards, moonwalking, walking backward, sliding across floor, drifting back, retreating, duplicate feet, ghost boots, skipping thighs, unarmored thighs, headless, missing head, floating helmet, flying helmet, dropping helmet from above, descending helmet, sudden pop-in armor, instant arm armor appearance, weapon disappearing, amputee, changing background, morphing room, Robert Downey Jr, Tony Stark, celebrity face.
+==================================================`;
+
+                        fullDownloadText += unifiedText + "\n\n";
+                        containerHtml += `
+                            <div class="glass-input rounded-xl p-4 relative flex flex-col border-cyan-500/40">
+                                <div class="flex justify-between items-center mb-4 border-b border-cyan-500/30 pb-3">
+                                    <h3 class="text-sm font-bold text-cyan-300 font-display flex items-center gap-2">
+                                        PROMPT SCENE ${i} (${startT.toFixed(1)}s - ${endT.toFixed(1)}s)
+                                    </h3>
+                                    <button onclick="copyToClipboard('unifiedScriptText_${i}')" class="text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-lg">Copy Script</button>
+                                </div>
+                                <textarea id="unifiedScriptText_${i}" class="w-full bg-black/40 border border-cyan-500/20 text-green-400 text-sm h-[520px] p-4 rounded-xl font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner resize-y">${unifiedText}</textarea>
+                            </div>`;
+                    }
+
+                } else {
+                    const presetSelect = document.getElementById('presetKendaraan');
+                    const presetJudul = presetSelect.options[presetSelect.selectedIndex].text;
+                    let userText = document.getElementById('textArahanKendaraan').value;
+                    const vehFile = document.getElementById('uploadKendaraan').files[0];
+                    const bgVehFile = document.getElementById('uploadBgKendaraan').files[0];
+                    const vehName = vehFile ? vehFile.name : "Kendaraan_Ref.png";
+                    const bgVehName = bgVehFile ? bgVehFile.name : "Latar_Belakang_Kendaraan.png";
+
+                    for (let i = 1; i <= sceneCount; i++) {
+                        let startT = (i - 1) * durationPerScene;
+                        let endT = i * durationPerScene;
+                        let continuityNote = i > 1 ? `\n[CONTINUITY NOTE: Maintain exact ending visual state from Scene ${i-1}.]` : "";
+                        
+                        let seg = durationPerScene / 4;
+                        let t0 = startT, t1 = startT + seg, t2 = startT + (seg * 2), t3 = startT + (seg * 3), t4 = endT;
+
+                        let timelinePacing = `
+[STRICT SECOND-BY-SECOND TIMELINE]
+- ${t0.toFixed(1)}s to ${t1.toFixed(1)}s: INITIATION. Vehicle chassis fractures along hidden seam lines. Suspension lifts, wheels/wings begin to unhinge. Riders disappear.
+- ${t1.toFixed(1)}s to ${t2.toFixed(1)}s: EXPANSION. Engine blocks shift, central mass elongates to form torso.
+- ${t2.toFixed(1)}s to ${t3.toFixed(1)}s: LIMB FORMATION. Tires, exhaust, or wings fold into heavy mechanical legs and arms.
+- ${t3.toFixed(1)}s to ${t4.toFixed(1)}s: COMPLETION. Detailed mechanical head emerges from hood/cockpit area, optical sensors glow.`;
+
+                        let unifiedText = `==================================================
+TRANSFORM UNIT SCRIPT - SCENE ${i} (${startT.toFixed(1)}s - ${endT.toFixed(1)}s)
+==================================================
+Ref: ${vehName}, ${bgVehName}
+Class: ${presetJudul}
+Ratio: ${ratio}
+Mode: VEHICLE TO MECH
+Target: ${videoAiMode === 'start_end' ? 'Start & End Frame Mode' : 'Standard Text-to-Video'}
+${continuityNote}
+
+[ACTION & MECHANICS]
+${userText}
+Transformation sequence from vehicle to mecha.
+${timelinePacing}
+
+[STRICT VEHICLE TRANSFORMATION ENFORCEMENTS]
+- NON-COPYRIGHTED DESIGN: Original sentient robot design.
+- VEHICLE INTEGRITY: Utilize original parts as functional armor.
+- COLOR RETENTION: Maintain exact primary color palette.
+- ENVIRONMENT LOCK: Background environment MUST remain strictly unchanged.
+
+[NEGATIVE PROMPT]
+transformers logo, optimus prime, bumblebee, human driver, flying unattached parts, changing background.
+==================================================`;
+
+                        fullDownloadText += unifiedText + "\n\n";
+                        containerHtml += `
+                            <div class="glass-input rounded-xl p-4 relative flex flex-col border-blue-500/40">
+                                <div class="flex justify-between items-center mb-4 border-b border-blue-500/30 pb-3">
+                                    <h3 class="text-sm font-bold text-blue-300 font-display flex items-center gap-2">
+                                        PROMPT SCENE ${i} (${startT.toFixed(1)}s - ${endT.toFixed(1)}s)
+                                    </h3>
+                                    <button onclick="copyToClipboard('unifiedScriptText_${i}')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-lg">Copy Script</button>
+                                </div>
+                                <textarea id="unifiedScriptText_${i}" class="w-full bg-black/40 border border-blue-500/20 text-cyan-400 text-sm h-[520px] p-4 rounded-xl font-mono focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all shadow-inner resize-y">${unifiedText}</textarea>
+                            </div>`;
+                    }
+                }
+
+                containerHtml += `
+                    <textarea id="fullScriptText" class="hidden">${fullDownloadText}</textarea>
+                    <button onclick="downloadText('fullScriptText', 'Marskey_Master_Script_Full')" class="w-full py-4 text-sm bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2">
+                        Download Semua Scene (.txt)
+                    </button>
+                </div>`;
+
+                document.getElementById('outputContainer').innerHTML = containerHtml;
+                btn.innerHTML = "JADIKAN KARYAMU (Prompt Video)";
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }, 800);
+        }
+    </script>
+</body>
+</html>
